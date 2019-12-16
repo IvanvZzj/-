@@ -1,0 +1,43 @@
+server:
+  port: 8081
+  context-path: /test
+  jsp-servlet:
+    init-parameters:
+      development: true  #开启jsp页面的调试模式
+
+#数据源
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521:xe
+    driver-class-name: oracle.jdbc.OracleDriver
+    username: hr
+    password: root
+#文件上传的最大值
+  http:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+  #配置视图解析器
+  mvc:
+    view:
+      prefix: /
+      suffix: .jsp
+
+#配置mybatis参数
+mybatis:
+  type-aliases-package: cn.edu.lynu.entity
+  mapper-locations: classpath:cn/edu/lynu/mapper/*.xml
+
+#日志
+logging:
+  level:
+    root: info
+    com.baizhi.dao: debug
+
+#pagehelper分页插件配置
+pagehelper:
+  helperDialect: oracle
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.edu.lynu.mapper.JobCateMapper">
+
+    <!--配置一对多关系-->
+    <resultMap type="JobCate" id="jobCateMap">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="parentId" property="parentId"/>
+        <result column="hotid" property="hotid"/>
+        <result column="type" property="type"/>
+        <!-- 封装关系属性 -->
+        <collection property="childJobCate" ofType="JobCate">
+            <id column="c_id" property="id"/>
+            <result column="c_name" property="name"/>
+            <result column="c_parentId" property="parentId"/>
+            <result column="c_hotid" property="hotid"/>
+            <result column="c_type" property="type"/>
+        </collection>
+    </resultMap>
+
+    <!-- sql查询条件片段 -->
+    <sql id="jobcate">
+        tj.id as id,
+		tj.name as name,
+		tj.parentId as parentId,
+		tj.hotid as hotid ,
+		tj.type as type
+    </sql>
+
+    <sql id="jobcateAndChild">
+		tjp.id as id,
+		tjp.name as name,
+		tjp.parentId as parentId,
+		tjp.hotid as hotid ,
+		tjp.type as type,
+		tjc.id as c_id,
+		tjc.name as c_name,
+		tjc.parentid as c_parentId,
+		tjc.hotid as c_hotid,
+		tjc.type as c_type
+	</sql>
+
+
+    <!--查询一级类别及一级类别下的热门推荐类别-->
+    <select id="queryFistAndHotCate" resultMap="jobCateMap">
+        select
+        <include refid="jobcateAndChild"/>
+        from(
+        select
+        <include refid="jobcate"/>
+        from t_jobcate tj where type= 1) tjp
+        left join t_jobcate tjc on tjp.id = tjc.hotid
+    </select>
+
+    <!--根据父类id查询其子类及孙类-->
+    <select id="querySecondAndThree" resultMap="jobCateMap">
+        select
+        <include refid="jobcateAndChild"/>
+        from (
+        select
+        <include refid="jobcate"/>
+        from t_jobcate tj where parentid = #{id}) tjp left join t_jobcate tjc on tjp.id = tjc.parentid
+    </select>
+
+    <!--查询所有-->
+    <select id="queryAllJobCate" resultMap="jobCateMap">
+        select
+        <include refid="jobcateAndChild"/>
+        from(
+        select
+        <include refid="jobcate"/>
+        from t_jobcate tj) tjp left join t_jobcate tjc on tjp.parentid = tjc.id
+    </select>
+
+    <!--添加一个岗位类别-->
+    <insert id="insertJobCate">
+        insert into t_jobcate (id,name,parentId,type) values
+        (#{id},#{name},#{parentId,jdbcType=VARCHAR},#{type})
+    </insert>
+
+</mapper>
